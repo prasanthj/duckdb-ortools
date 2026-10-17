@@ -1,0 +1,55 @@
+name: Native build and tests
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    name: ${{ matrix.platform }} / DuckDB 1.4.5 + 1.5.6
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            platform: linux_amd64
+          - runner: ubuntu-24.04-arm
+            platform: linux_arm64
+          - runner: macos-26
+            platform: osx_arm64
+          - runner: macos-26-intel
+            platform: osx_amd64
+    runs-on: ${{ matrix.runner }}
+    env:
+      ORTOOLS_BUILD_JOBS: '4'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          enable-cache: true
+      - name: Cache source-built permissive OR-Tools
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: vendor/ortools-minimal
+          key: ${{ runner.os }}-${{ runner.arch }}-ortools-minimal-${{ hashFiles('scripts/dependencies.py', 'scripts/sources.json', 'scripts/patches/*') }}
+      - name: Build, test, audit, and verify both DuckDB versions
+        run: |
+          for duckdb_version in 1.4.5 1.5.6; do
+            build_dir="build-$duckdb_version"
+            DUCKDB_VERSION="$duckdb_version" ORTOOLS_BUILD_DIR="$build_dir" ./build.sh
+            ORTOOLS_EXTENSION="$build_dir/extension/ortools/ortools.duckdb_extension" \
+              uv run --with "duckdb==$duckdb_version" pytest -q
+            uv run python scripts/package_release.py --build-dir "$build_dir" \
+              --platform '${{ matrix.platform }}' --duckdb-version "$duckdb_version"
+            uv run --with "duckdb==$duckdb_version" python scripts/verify_package.py \
+              "dist/ortools-v0.1.0-duckdb-v$duckdb_version-${{ matrix.platform }}.tar.gz" \
+              --backend-probe "$build_dir/extension/ortools/ortools_backend_test"
+          done
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ortools-${{ matrix.platform }}
+          path: dist/*
+          retention-days: 14
+          compression-level: 0

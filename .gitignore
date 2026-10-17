@@ -1,0 +1,12 @@
+build/
+build-*/
+vendor/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+dist/
+data/
+artifacts/
+test-results.xml
+.env*

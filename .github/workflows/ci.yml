@@ -1,0 +1,47 @@
+name: Native CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  # Let a cold native dependency build populate the cache for the next revision.
+  cancel-in-progress: false
+jobs:
+  test:
+    name: DuckDB ${{ matrix.duckdb }} / Linux x86-64
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        duckdb: ['1.4.5', '1.5.6']
+    env:
+      DUCKDB_VERSION: ${{ matrix.duckdb }}
+      ORTOOLS_BUILD_JOBS: '4'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          enable-cache: true
+      - name: Cache source-built permissive OR-Tools
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: vendor/ortools-minimal
+          key: ${{ runner.os }}-${{ runner.arch }}-ortools-minimal-${{ hashFiles('scripts/dependencies.py', 'scripts/sources.json', 'scripts/patches/*') }}
+      - run: ./build.sh
+      - name: Verify the real extension
+        run: |
+          uv run --with "duckdb==$DUCKDB_VERSION" pytest -q --junitxml=test-results.xml
+          uv run ruff check tests scripts
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: tests-duckdb-${{ matrix.duckdb }}-linux-amd64
+          path: test-results.xml
+          retention-days: 14

@@ -1,0 +1,22 @@
+DuckDB OR-Tools extension
+Copyright 2026 Prasanth Jayachandran
+
+This project links Google OR-Tools (Apache-2.0) and DuckDB (MIT).
+DuckDB's licence is included in third_party/LICENSE.duckdb.
+The vendored nlohmann/json header is MIT licensed; its licence is in
+src/include/LICENSE.nlohmann-json.
+
+Native packages contain a source-built OR-Tools library with COIN-OR, GLPK,
+PDLP/Eigen and unused external solvers disabled. The allowed source dependencies
+are OR-Tools and Abseil (Apache-2.0), Protobuf and RE2 (BSD-3-Clause), utf8_range
+(MIT), zlib (Zlib), and libbzip2 (the permissive bzip2 licence).
+
+libbzip2 is copyright (C) 1996-2010 Julian R Seward.
+
+Preserve the dependency licences and applied-build patches in upstream-notices/.
+The bundle's build-receipt.json records pinned source commits, hashes, licences,
+and the disabled-backend policy. Our OR-Tools build integration changes two
+CMake dependency checks to require Eigen only when PDLP or MathOpt is enabled,
+and omits unused language model-builder wrappers that assume Gurobi is enabled.
+Runtime solver sources are unchanged. Other build integration patches are
+those distributed by upstream OR-Tools v9.15.

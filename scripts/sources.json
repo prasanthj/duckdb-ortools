@@ -1,0 +1,66 @@
+{
+  "ortools": {
+    "repository": "https://github.com/google/or-tools",
+    "commit": "551ad10d94835c99e5e1e684500d3db398c0e345",
+    "url": "https://codeload.github.com/google/or-tools/tar.gz/551ad10d94835c99e5e1e684500d3db398c0e345",
+    "sha256": "df831c6f5cde1e407f0575b0260cc8b654f260ba49d2face535bb8ecbc904496",
+    "license": "Apache-2.0",
+    "license_files": [
+      "LICENSE"
+    ]
+  },
+  "zlib": {
+    "repository": "https://github.com/madler/zlib",
+    "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+    "url": "https://codeload.github.com/madler/zlib/tar.gz/51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
+    "sha256": "d9e270d46252734aa49770fbc544125391617956266f220bd63216c834f3a522",
+    "license": "Zlib",
+    "license_files": [
+      "LICENSE"
+    ]
+  },
+  "absl": {
+    "repository": "https://github.com/abseil/abseil-cpp",
+    "commit": "d38452e1ee03523a208362186fd42248ff2609f6",
+    "url": "https://codeload.github.com/abseil/abseil-cpp/tar.gz/d38452e1ee03523a208362186fd42248ff2609f6",
+    "sha256": "d1abe9da2003e6cbbd7619b0ced3e52047422f4f4ac6c66a9bef5d2e99fea837",
+    "license": "Apache-2.0",
+    "license_files": [
+      "LICENSE"
+    ]
+  },
+  "protobuf": {
+    "repository": "https://github.com/protocolbuffers/protobuf",
+    "commit": "a8d85ffbc7158660b4247f732371d1b07780510e",
+    "url": "https://codeload.github.com/protocolbuffers/protobuf/tar.gz/a8d85ffbc7158660b4247f732371d1b07780510e",
+    "sha256": "70b991f2e16f38a62592ce2e2f083129fa3b0d48de497d37cd3c5df88245bc97",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "LICENSE",
+      "third_party/utf8_range/LICENSE"
+    ],
+    "additional_licenses": {
+      "third_party/utf8_range/LICENSE": "MIT"
+    }
+  },
+  "re2": {
+    "repository": "https://github.com/google/re2",
+    "commit": "0f6c07eae69151e606acb3d9232750c3442dff23",
+    "url": "https://codeload.github.com/google/re2/tar.gz/0f6c07eae69151e606acb3d9232750c3442dff23",
+    "sha256": "c3b1684ccfa80d21eec461ed8d610e7f371c07d3089959da2766110a4e5caf69",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "LICENSE"
+    ]
+  },
+  "bzip2": {
+    "repository": "https://gitlab.com/bzip2/bzip2",
+    "commit": "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
+    "url": "https://gitlab.com/bzip2/bzip2/-/archive/66c46b8c9436613fd81bc5d03f63a61933a4dcc3/bzip2-66c46b8c9436613fd81bc5d03f63a61933a4dcc3.tar.gz",
+    "sha256": "3a4cff5f9d197e9e6c6138660afa6b1f9370df0bed135bd949243f6dfc83b3e1",
+    "license": "bzip2-1.0.6",
+    "license_files": [
+      "COPYING"
+    ]
+  }
+}

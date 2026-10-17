@@ -1,0 +1,41 @@
+--- a/cmake/system_deps.cmake
++++ b/cmake/system_deps.cmake
+@@ -38,7 +38,7 @@
+   find_package(Protobuf REQUIRED)
+ endif()
+ 
+-if(NOT BUILD_Eigen3 AND NOT TARGET Eigen3::Eigen)
++if((USE_PDLP OR BUILD_MATH_OPT) AND NOT BUILD_Eigen3 AND NOT TARGET Eigen3::Eigen)
+   find_package(Eigen3 REQUIRED)
+ endif()
+ 
+--- a/cmake/check_deps.cmake
++++ b/cmake/check_deps.cmake
+@@ -62,7 +62,7 @@
+   message(FATAL_ERROR "Target protobuf::libprotobuf not available.")
+ endif()
+ 
+-if(NOT TARGET Eigen3::Eigen)
++if((USE_PDLP OR BUILD_MATH_OPT) AND NOT TARGET Eigen3::Eigen)
+   message(FATAL_ERROR "Target Eigen3::Eigen not available.")
+ endif()
+ 
+--- a/cmake/cpp.cmake
++++ b/cmake/cpp.cmake
+@@ -681,9 +681,13 @@
+   target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_math_opt)
+ endif()
+ 
+-add_subdirectory(ortools/linear_solver/wrappers)
+-target_sources(${PROJECT_NAME} PRIVATE $<TARGET_OBJECTS:${PROJECT_NAME}_linear_solver_wrappers>)
+-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_linear_solver_wrappers)
++# The language model-builder wrapper assumes Gurobi is present even when disabled.
++# Our native extension uses neither this wrapper nor any language bindings.
++if(BUILD_PYTHON OR BUILD_JAVA OR BUILD_DOTNET)
++  add_subdirectory(ortools/linear_solver/wrappers)
++  target_sources(${PROJECT_NAME} PRIVATE $<TARGET_OBJECTS:${PROJECT_NAME}_linear_solver_wrappers>)
++  add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_linear_solver_wrappers)
++endif()
+ 
+ add_subdirectory(ortools/linear_solver/proto_solver)
+ target_sources(${PROJECT_NAME} PRIVATE $<TARGET_OBJECTS:${PROJECT_NAME}_linear_solver_proto_solver>)
