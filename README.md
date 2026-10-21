@@ -257,7 +257,7 @@ uv run ruff check tests scripts
 
 The native suite checks integer optima against exhaustive enumeration, fractional allocation, assumption cores, validation, row independence, chunk/UNION conservation, cancellation, scheduling, and excluded solver factories. Python OR-Tools is not a dependency. See [verification.md](docs/verification.md).
 
-[Native CI](.github/workflows/ci.yml) runs on pushes/PRs for both DuckDB versions. The manually dispatched [native build and test workflow](.github/workflows/release.yml) builds all four platform targets, tests both versions, audits dependencies, and verifies extracted packages in a relocated directory. It uploads workflow artifacts; it does not publish GitHub Releases.
+[Native CI](.github/workflows/ci.yml) runs on pushes/PRs for all three DuckDB versions. The manually dispatched [native build and test workflow](.github/workflows/release.yml) builds all four platform targets, tests all three versions, audits dependencies, and verifies extracted packages in a relocated directory. After all jobs succeed, the twelve verified packages and their checksums are published together as a new [GitHub Release](https://github.com/prasanthj/duckdb-ortools/releases). Existing published releases are preserved.
 
 To package a local build, use the platform/version that actually produced it. For example, on macOS ARM64 with the default build:
 

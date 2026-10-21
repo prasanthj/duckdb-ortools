@@ -38,4 +38,4 @@ ORTOOLS_EXTENSION=build-2.0.0/extension/ortools/ortools.duckdb_extension \
   uv run --with duckdb==2.0.0 pytest -q
 ```
 
-Native CI runs DuckDB 1.4.5, 1.5.6 and 2.0.0 on Linux x86-64. The manual platform workflow builds, tests, packages, and verifies all three versions on Linux/macOS x86-64 and ARM64. It retains workflow artifacts rather than publishing releases.
+Native CI runs DuckDB 1.4.5, 1.5.6 and 2.0.0 on Linux x86-64. The manual platform workflow builds, tests, packages, and verifies all three versions on Linux/macOS x86-64 and ARM64. Release publication follows only after all four jobs succeed: download their workflow artifacts, verify all twelve archives against their SHA-256 sidecars, and attach every archive and checksum to a new tag at the tested commit. The workflow retains artifacts; publishing the GitHub Release is a separate maintainer action.
