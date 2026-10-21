@@ -9,10 +9,19 @@
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_order.hpp"
 #include "solver.hpp"
+#ifdef ORTOOLS_DUCKDB_2
+#include "duckdb/common/identifier.hpp"
+#include "duckdb/main/settings.hpp"
+#endif
 #include <cmath>
 #include <set>
 
 namespace duckdb {
+#ifdef ORTOOLS_DUCKDB_2
+using SqlIdentifier = Identifier;
+#else
+using SqlIdentifier = string;
+#endif
 static constexpr idx_t MAX_BYTES = 64 * 1024 * 1024;
 
 static void SolveScalar(DataChunk &input, ExpressionState &state, Vector &output) {
@@ -59,10 +68,14 @@ struct AllocateState : LocalTableFunctionState {
   SolverResult result;
 };
 static unique_ptr<FunctionData> AllocateBind(ClientContext &context, TableFunctionBindInput &input,
-                                             vector<LogicalType> &types, vector<string> &names) {
+                                             vector<LogicalType> &types, vector<SqlIdentifier> &names) {
+#ifdef ORTOOLS_DUCKDB_2
+  if (!Settings::Get<EnableOptimizerSetting>(context))
+#else
   if (!ClientConfig::GetConfig(context).enable_optimizer)
+#endif
     throw BinderException("ortools_allocate requires the optimizer for its input materialization barrier");
-  const vector<string> expected{"scenario_id",     "tasker_id",    "bucket_id",
+  const vector<SqlIdentifier> expected{"scenario_id",     "tasker_id",    "bucket_id",
                                 "available_hours", "demand_hours", "gap_cost_per_hour"};
   if (input.input_table_names != expected)
     throw BinderException("ortools_allocate expects columns: scenario_id, tasker_id, bucket_id, available_hours, "
@@ -221,7 +234,12 @@ static void MaterializeAllocation(OptimizerExtensionInput &input, unique_ptr<Log
   if (plan->type != LogicalOperatorType::LOGICAL_GET)
     return;
   auto &get = plan->Cast<LogicalGet>();
-  if (get.function.name != "ortools_allocate" || get.children.size() != 1)
+#ifdef ORTOOLS_DUCKDB_2
+  const auto &name = get.function.GetName();
+#else
+  const auto &name = get.function.name;
+#endif
+  if (name != "ortools_allocate" || get.children.size() != 1)
     return;
   auto &child = get.children[0];
   auto bindings = child->GetColumnBindings();
@@ -234,14 +252,27 @@ static void MaterializeAllocation(OptimizerExtensionInput &input, unique_ptr<Log
 }
 static void LoadInternal(ExtensionLoader &loader) {
   ScalarFunction solve("ortools_solve", {LogicalType::VARCHAR}, SolverResultType(), SolveScalar);
+#ifdef ORTOOLS_DUCKDB_2
+  solve.SetStability(FunctionStability::VOLATILE);
+  solve.SetNullHandling(FunctionNullHandling::SPECIAL_HANDLING);
+  solve.SetFallible();
+#else
   solve.stability = FunctionStability::VOLATILE;
   solve.null_handling = FunctionNullHandling::SPECIAL_HANDLING;
+#endif
   loader.RegisterFunction(solve);
   loader.RegisterFunction(ScalarFunction("ortools_version", {}, LogicalType::VARCHAR, VersionScalar));
   TableFunction allocate("ortools_allocate", {LogicalType::TABLE}, nullptr, AllocateBind, AllocateGlobal,
                          AllocateLocal);
+#ifdef ORTOOLS_DUCKDB_2
+  allocate.GetSignature().WithTypedKwargs("options", [](TypedKwargs &options) {
+    options.Add("solver", LogicalType::VARCHAR);
+    options.Add("time_limit_ms", LogicalType::BIGINT);
+  });
+#else
   allocate.named_parameters["solver"] = LogicalType::VARCHAR;
   allocate.named_parameters["time_limit_ms"] = LogicalType::BIGINT;
+#endif
   allocate.in_out_function = AllocateInput;
   allocate.in_out_function_final = AllocateFinal;
   loader.RegisterFunction(allocate);

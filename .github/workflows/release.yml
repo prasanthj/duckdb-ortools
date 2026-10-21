@@ -5,7 +5,7 @@ permissions:
   contents: read
 jobs:
   build:
-    name: ${{ matrix.platform }} / DuckDB 1.4.5 + 1.5.6
+    name: ${{ matrix.platform }} / DuckDB 1.4.5 + 1.5.6 + 2.0.0
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -34,9 +34,9 @@ jobs:
         with:
           path: vendor/ortools-minimal
           key: ${{ runner.os }}-${{ runner.arch }}-ortools-minimal-${{ hashFiles('scripts/dependencies.py', 'scripts/sources.json', 'scripts/patches/*') }}
-      - name: Build, test, audit, and verify both DuckDB versions
+      - name: Build, test, audit, and verify all three DuckDB versions
         run: |
-          for duckdb_version in 1.4.5 1.5.6; do
+          for duckdb_version in 1.4.5 1.5.6 2.0.0; do
             build_dir="build-$duckdb_version"
             DUCKDB_VERSION="$duckdb_version" ORTOOLS_BUILD_DIR="$build_dir" ./build.sh
             ORTOOLS_EXTENSION="$build_dir/extension/ortools/ortools.duckdb_extension" \

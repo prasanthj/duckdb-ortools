@@ -33,8 +33,9 @@ uv run ruff check tests scripts
 Use `ORTOOLS_EXTENSION` to select another build, with a matching DuckDB runtime. For example:
 
 ```sh
-ORTOOLS_EXTENSION=build-1.4.5/extension/ortools/ortools.duckdb_extension \
-  uv run --with duckdb==1.4.5 pytest -q
+DUCKDB_VERSION=2.0.0 ORTOOLS_BUILD_DIR=build-2.0.0 ./build.sh
+ORTOOLS_EXTENSION=build-2.0.0/extension/ortools/ortools.duckdb_extension \
+  uv run --with duckdb==2.0.0 pytest -q
 ```
 
-Native CI runs both supported DuckDB versions on Linux x86-64. The manual platform workflow builds, tests, packages, and verifies both versions on Linux/macOS x86-64 and ARM64. It retains workflow artifacts rather than publishing releases.
+Native CI runs DuckDB 1.4.5, 1.5.6 and 2.0.0 on Linux x86-64. The manual platform workflow builds, tests, packages, and verifies all three versions on Linux/macOS x86-64 and ARM64. It retains workflow artifacts rather than publishing releases.

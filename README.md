@@ -3,7 +3,7 @@
 [![Native build and tests](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml/badge.svg)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
 [![Native CI](https://github.com/prasanthj/duckdb-ortools/actions/workflows/ci.yml/badge.svg)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/ci.yml)
 [![Status: private development](https://img.shields.io/badge/status-private%20development-orange)](https://github.com/prasanthj/duckdb-ortools)
-[![DuckDB](https://img.shields.io/badge/DuckDB-1.4.5%20%7C%201.5.6-fff000?logo=duckdb&logoColor=black)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
+[![DuckDB 1.4.5, 1.5.6 and 2.0.0](https://img.shields.io/badge/DuckDB-1.4.5%20%7C%201.5.6%20%7C%202.0.0-fff000?logo=duckdb&logoColor=black)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
 [![Native targets](https://img.shields.io/badge/native-macOS%20%7C%20Linux%20%C2%B7%20x86--64%20%7C%20ARM64-blue)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
 [![OR-Tools](https://img.shields.io/badge/OR--Tools-9.15-blue)](https://developers.google.com/optimization)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -35,7 +35,7 @@ The extension calls native C++ OR-Tools directly. It needs no AI provider, API k
 - **Explicit solution quality:** retain status, objective, search bound, elapsed time, and diagnostics.
 - **Query cancellation:** interrupt active native search through DuckDB cancellation.
 - **Permissive distribution:** pinned source dependencies, excluded solver backends, native factory regressions, and recursive package audits.
-- **Native build matrix:** DuckDB 1.4.5 and 1.5.6 on macOS/Linux, x86-64 and ARM64.
+- **Native build matrix:** DuckDB 1.4.5, 1.5.6 and 2.0.0 on macOS/Linux, x86-64 and ARM64.
 
 ## Quick start
 
@@ -49,10 +49,12 @@ cd duckdb-ortools
 ./build.sh
 ```
 
-The default target is DuckDB 1.5.6. To build 1.4.5 separately:
+The default target is DuckDB 1.5.6. To build and test 2.0.0 separately (substitute 1.4.5 for the older release):
 
 ```sh
-DUCKDB_VERSION=1.4.5 ORTOOLS_BUILD_DIR=build-1.4.5 ./build.sh
+DUCKDB_VERSION=2.0.0 ORTOOLS_BUILD_DIR=build-2.0.0 ./build.sh
+ORTOOLS_EXTENSION=build-2.0.0/extension/ortools/ortools.duckdb_extension \
+  uv run --with duckdb==2.0.0 pytest -q
 ```
 
 Use a matching DuckDB runtime. For the default build, start Python with `uv run python` and open a connection:
