@@ -1,0 +1,37 @@
+# name: test/sql/ortools.test
+# description: Native solver and license smoke tests for community distribution
+# group: [sql]
+
+require ortools
+
+query I
+SELECT contains(ortools_version(), 'OR-Tools 9.15.6755');
+----
+true
+
+query II
+SELECT contains(ortools_licenses(), 'Apache License'),
+       contains(ortools_licenses(), 'Redistribution and use in source and binary forms');
+----
+true	true
+
+query TII
+WITH solution AS (
+  SELECT ortools_solve('{"version":1,"solver":"cp_sat","maximize":true,"variables":[{"id":"x","upper":4,"objective":2}],"constraints":[]}') AS result
+)
+SELECT result.status, result.objective = 8, result.values['x'] = 4 FROM solution;
+----
+OPTIMAL	true	true
+
+query TII
+WITH solution AS (
+  SELECT ortools_solve('{"version":1,"solver":"glop","maximize":true,"variables":[{"id":"x","integer":false,"upper":3.75,"objective":2}],"constraints":[]}') AS result
+)
+SELECT result.status, result.objective = 7.5, result.values['x'] = 3.75 FROM solution;
+----
+OPTIMAL	true	true
+
+statement error
+SELECT ortools_solve('{"version":1,"solver":"gurobi","variables":[],"constraints":[]}');
+----
+solver must be cp_sat or glop

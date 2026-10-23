@@ -1,9 +1,5 @@
-.PHONY: all release test lint clean
-all release:
-	./build.sh
-test:
-	uv run pytest -q
-lint:
-	uv run ruff check tests scripts examples
-clean:
-	uv run cmake --build build --target clean
+PROJ_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+EXT_NAME=ortools
+EXT_CONFIG=${PROJ_DIR}extension_config.cmake
+
+include extension-ci-tools/makefiles/duckdb_extension.Makefile

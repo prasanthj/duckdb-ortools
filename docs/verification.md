@@ -16,7 +16,13 @@ The scheduling contract uses small synthetic inputs to check qualification, comm
 
 ## Distribution contracts
 
-The native factory probe attempts CBC and CLP creation, including long aliases, and requires every attempt to fail. GLOP and CP-SAT positive controls solve an optimization problem. SQL validation independently rejects unsupported backend names.
+The native factory probe attempts CBC, CLP, Gurobi, CPLEX, Xpress, GLPK, SCIP, HiGHS, and PDLP creation, including LP/MIP variants, and requires every attempt to fail. GLOP and CP-SAT positive controls solve an optimization problem. SQL validation independently rejects unsupported backend names.
+
+The community build uses the standard extension Makefile and version-specific APIs selected by CMake. It statically links the same checksum-pinned minimal OR-Tools sources; no adjacent library directory is needed. Community SQL smoke tests live in `test/sql/ortools.test` and exercise both solvers and the embedded license notices.
+
+## Community publication
+
+For every release intended for community users, update the tested source commit and extension version in `extensions/ortools/description.yml` in `duckdb/community-extensions`. Keep explicit `ref` (2.0), `variegata` (1.5), and `andium` (1.4) pins. Ask maintainers for older-version deployments when their automatic jobs are disabled. After merge, verify fresh installations on each supported runtime/platform. GitHub release assets are not imported automatically.
 
 Recursive library audits permit only the declared dependency families and platform runtimes. They reject unknown libraries, unresolved dependencies, escaping symlinks, and absolute non-system loader paths. See the [dependency policy](dependencies.md).
 

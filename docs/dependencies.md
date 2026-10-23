@@ -27,6 +27,8 @@ The minimal installation uses a separate prefix from the former prebuilt distrib
 
 ## Regression proof
 
+The standard community build uses a separate static dependency prefix. Its build patch preserves the requested linkage for dependencies and Protobuf without changing solver code. All original solver exclusions and checksum-pinned sources remain in force. The single extension embeds dependency license texts and modification notices, readable with `SELECT ortools_licenses();`.
+
 `tests/native/solver_boundary.cpp` calls the real OR-Tools factory with CBC and CLP names and their long aliases. Every attempt must return no solver. Positive controls create GLOP and CP-SAT solvers and solve a small optimization problem. This test failed against the original all-solvers bundle: CBC could solve the problem and CLP could be instantiated. It must pass against the minimal source build.
 
 `tests/test_distribution.py` executes that native test against the extension's adjacent shared libraries. The existing SQL invalid-input test also explicitly rejects `cbc` and `clp` model requests.

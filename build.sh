@@ -72,12 +72,10 @@ if not marker.exists() or marker.read_text() != signature:
     build.mkdir(parents=True, exist_ok=True)
     marker.write_text(signature)
 PYCODE
-legacy=OFF
-[ "$duckdb_version" = 1.4.5 ] && legacy=ON
 uv run --frozen cmake -S "$source_dir" -B "$build_dir" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=20 \
   -DBUILD_UNITTESTS=OFF -DBUILD_SHELL=OFF -DENABLE_JEMALLOC=OFF -DEXTENSION_STATIC_BUILD=OFF \
   -DDUCKDB_EXPLICIT_VERSION="v$duckdb_version" \
-  -DORTOOLS_DUCKDB_STATIC_DIR="$static_dir" -DORTOOLS_DUCKDB_1_4="$legacy" \
+  -DORTOOLS_DUCKDB_STATIC_DIR="$static_dir" \
   -DCMAKE_PREFIX_PATH="$ortools_prefix" -Dortools_DIR="$ortools_prefix/lib/cmake/ortools" -DDUCKDB_EXTENSION_CONFIGS="$PWD/extension_config.cmake" "$@"
 uv run --frozen cmake --build "$build_dir" --target ortools_loadable_extension --parallel "${ORTOOLS_BUILD_JOBS:-4}"
 # The native extension and its dependency directory are one relocatable package.

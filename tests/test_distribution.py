@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 
-def test_epl_solvers_cannot_be_called():
+def test_excluded_solver_factories_unavailable():
     extension = Path(os.environ.get("ORTOOLS_EXTENSION", "build/extension/ortools/ortools.duckdb_extension")).resolve()
     result = subprocess.run(
         [str(extension.parent / "ortools_backend_test")], check=False, capture_output=True, text=True

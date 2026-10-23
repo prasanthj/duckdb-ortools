@@ -2,7 +2,6 @@
 
 [![Native build and tests](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml/badge.svg)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
 [![Native CI](https://github.com/prasanthj/duckdb-ortools/actions/workflows/ci.yml/badge.svg)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/ci.yml)
-[![Status: private development](https://img.shields.io/badge/status-private%20development-orange)](https://github.com/prasanthj/duckdb-ortools)
 [![DuckDB 1.4.5, 1.5.6 and 2.0.0](https://img.shields.io/badge/DuckDB-1.4.5%20%7C%201.5.6%20%7C%202.0.0-fff000?logo=duckdb&logoColor=black)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
 [![Native targets](https://img.shields.io/badge/native-macOS%20%7C%20Linux%20%C2%B7%20x86--64%20%7C%20ARM64-blue)](https://github.com/prasanthj/duckdb-ortools/actions/workflows/release.yml)
 [![OR-Tools](https://img.shields.io/badge/OR--Tools-9.15-blue)](https://developers.google.com/optimization)
@@ -12,7 +11,7 @@ Native constraint solving and resource allocation inside DuckDB SQL. Turn ordina
 
 **From independent rows to coordinated plans.** Use CP-SAT for integer and Boolean decisions, or GLOP for continuous linear allocation. Define explicit capacity, eligibility, budget, and precedence constraints, then inspect the solution alongside its input columns.
 
-Private development repository, ready to build and test locally. Development extensions are unsigned. There is no published release or community-extension installation yet.
+Native release archives are available on the [releases page](https://github.com/prasanthj/duckdb-ortools/releases). Those archives are unsigned. Community-extension submission is separate; a GitHub release does not enable `INSTALL ortools FROM community`.
 
 ## Why constraint solving in DuckDB?
 
@@ -74,7 +73,9 @@ LOAD 'build/extension/ortools/ortools.duckdb_extension';
 SELECT ortools_version();
 ```
 
-The extension and adjacent `lib/` directory must move together. Query execution calls C++ OR-Tools directly; Python is only a client/build/test tool.
+The standalone extension and adjacent `lib/` directory must move together. The standard community build (`git submodule update --init --recursive; make release`) instead links the same pinned minimal dependencies statically into a single extension file. Query execution calls C++ OR-Tools directly; Python is only a client/build/test tool.
+
+Source builds from this revision embed third-party license and modification notices, available with `SELECT ortools_licenses();`. Published standalone archives also include the notices as files.
 
 ### 2. Derive a solution from input columns
 

@@ -20,3 +20,7 @@ CMake dependency checks to require Eigen only when PDLP or MathOpt is enabled,
 and omits unused language model-builder wrappers that assume Gurobi is enabled.
 Runtime solver sources are unchanged. Other build integration patches are
 those distributed by upstream OR-Tools v9.15.
+
+The community build additionally preserves the requested static linkage for
+dependencies and Protobuf. The extension embeds these notices and dependency
+licenses, retrievable with SELECT ortools_licenses().

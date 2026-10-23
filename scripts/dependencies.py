@@ -1,5 +1,6 @@
 """Build checksum-pinned OR-Tools sources with only permissive dependencies."""
 
+import argparse
 import hashlib
 import json
 import os
@@ -11,7 +12,6 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PREFIX = ROOT / "vendor/ortools-minimal"
 DISABLED = ("COINOR", "GLPK", "SCIP", "HIGHS", "PDLP", "CPLEX", "GUROBI", "XPRESS")
 PATCHES = {
     "zlib": "ZLIB-v1.3.1.patch",
@@ -54,6 +54,11 @@ def fetch_source(name, entry, patch):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--static", action="store_true", help="Build self-contained community extension dependencies")
+    parser.add_argument("--cmake-arg", action="append", default=[])
+    args = parser.parse_args()
+    prefix = ROOT / "vendor" / ("ortools-minimal-static" if args.static else "ortools-minimal")
     lock_path = ROOT / "scripts/sources.json"
     lock = json.loads(lock_path.read_text())
     policy_patch = ROOT / "scripts/patches/ortools-minimal.patch"
@@ -62,22 +67,24 @@ def main():
         + policy_patch.read_bytes()
         + Path(__file__).read_bytes()
         + repr((platform.system(), platform.machine())).encode()
+        + repr((args.static, args.cmake_arg)).encode()
     ).hexdigest()
-    receipt = PREFIX / "build-receipt.json"
+    receipt = prefix / "build-receipt.json"
     if receipt.exists() and json.loads(receipt.read_text())["fingerprint"] == fingerprint:
         return
     source = fetch_source("ortools", lock["ortools"], policy_patch)
     dependencies = {name: fetch_source(name, lock[name], source / "patches" / patch) for name, patch in PATCHES.items()}
-    build = ROOT / "vendor/ortools-minimal-build"
+    build = ROOT / "vendor" / ("ortools-minimal-static-build" if args.static else "ortools-minimal-build")
     # A different dependency policy must never reuse installed libraries or cached
     # package locations from the old all-solvers distribution.
-    if PREFIX.exists():
-        shutil.rmtree(PREFIX)
-    PREFIX.mkdir(parents=True)
+    if prefix.exists():
+        shutil.rmtree(prefix)
+    prefix.mkdir(parents=True)
     flags = [
         "-DCMAKE_BUILD_TYPE=Release",
         "-DCMAKE_INSTALL_LIBDIR=lib",
-        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_SHARED_LIBS=" + ("OFF" if args.static else "ON"),
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
         "-DBUILD_DEPS=OFF",
         "-DBUILD_TESTING=OFF",
         "-DBUILD_SAMPLES=OFF",
@@ -97,9 +104,12 @@ def main():
     flags += [f"-DUSE_{name}=OFF" for name in DISABLED]
     flags += [f"-DBUILD_{name}=ON" for name in ("ZLIB", "BZip2", "absl", "Protobuf", "re2")]
     flags += [f"-DFETCHCONTENT_SOURCE_DIR_{name.upper()}={path}" for name, path in dependencies.items()]
+    if args.static:
+        flags.append("-DENABLE_STATIC_LIB=ON")
+    flags += args.cmake_arg
     environment = {**os.environ, "OR_TOOLS_PATCH": "6755"}
     subprocess.run(
-        ["cmake", "-S", str(source), "-B", str(build), "-G", "Ninja", f"-DCMAKE_INSTALL_PREFIX={PREFIX}", *flags],
+        ["cmake", "-S", str(source), "-B", str(build), "-G", "Ninja", f"-DCMAKE_INSTALL_PREFIX={prefix}", *flags],
         check=True,
         env=environment,
     )
@@ -115,7 +125,7 @@ def main():
     for key in [*(f"USE_{name}" for name in DISABLED), "BUILD_Eigen3", "BUILD_MATH_OPT"]:
         if cache.get(key + ":BOOL") != "OFF":
             raise SystemExit(f"Forbidden dependency enabled or missing from cache: {key}")
-    notices = PREFIX / "share/licenses"
+    notices = prefix / "share/licenses"
     inventory = []
     for name, entry in lock.items():
         directory = source if name == "ortools" else dependencies[name]
@@ -135,12 +145,13 @@ def main():
                 else "upstream patches/" + PATCHES[name],
             }
         )
-    shutil.copy2(lock_path, PREFIX / "sources.json")
+    shutil.copy2(lock_path, prefix / "sources.json")
     receipt.write_text(
         json.dumps(
             {
                 "fingerprint": fingerprint,
                 "ortools_version": "9.15.6755",
+                "linkage": "static" if args.static else "shared",
                 "disabled_backends": list(DISABLED),
                 "dependencies": inventory,
             },

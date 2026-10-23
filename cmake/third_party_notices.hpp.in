@@ -1,0 +1,3 @@
+#pragma once
+
+inline constexpr char kOrtoolsLicenses[] = R"licenses(@ORTOOLS_NOTICES@)licenses";

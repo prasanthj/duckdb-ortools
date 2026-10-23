@@ -9,6 +9,7 @@
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_order.hpp"
 #include "solver.hpp"
+#include "third_party_notices.hpp"
 #ifdef ORTOOLS_DUCKDB_2
 #include "duckdb/common/identifier.hpp"
 #include "duckdb/main/settings.hpp"
@@ -45,6 +46,10 @@ static void SolveScalar(DataChunk &input, ExpressionState &state, Vector &output
 static void VersionScalar(DataChunk &input, ExpressionState &, Vector &output) {
   output.SetVectorType(VectorType::CONSTANT_VECTOR);
   output.SetValue(0, Value("OR-Tools 9.15.6755 / DuckDB ortools 0.1.0"));
+}
+static void LicensesScalar(DataChunk &, ExpressionState &, Vector &output) {
+  output.SetVectorType(VectorType::CONSTANT_VECTOR);
+  output.SetValue(0, Value(kOrtoolsLicenses));
 }
 
 struct AllocateBindData : TableFunctionData {
@@ -262,6 +267,7 @@ static void LoadInternal(ExtensionLoader &loader) {
 #endif
   loader.RegisterFunction(solve);
   loader.RegisterFunction(ScalarFunction("ortools_version", {}, LogicalType::VARCHAR, VersionScalar));
+  loader.RegisterFunction(ScalarFunction("ortools_licenses", {}, LogicalType::VARCHAR, LicensesScalar));
   TableFunction allocate("ortools_allocate", {LogicalType::TABLE}, nullptr, AllocateBind, AllocateGlobal,
                          AllocateLocal);
 #ifdef ORTOOLS_DUCKDB_2

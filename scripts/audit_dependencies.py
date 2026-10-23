@@ -91,11 +91,25 @@ def audit(root):
     return {"status": "permissive dependency policy verified", "binaries_checked": len(checked)}
 
 
+def audit_single_file(binary):
+    binary = Path(binary).resolve()
+    dependencies, _paths = linked_libraries(binary)
+    for dependency in dependencies:
+        if platform.system() == "Darwin":
+            system_library = dependency.startswith(("/usr/lib/", "/System/Library/"))
+        else:
+            system_library = dependency in SYSTEM_LINUX
+        if not system_library:
+            raise ValueError(f"Community extension needs an external library: {dependency}")
+    return {"status": "self-contained community extension verified", "binaries_checked": 1}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle")
+    parser.add_argument("--single-file", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(audit(args.bundle)))
+    print(json.dumps(audit_single_file(args.bundle) if args.single_file else audit(args.bundle)))
 
 
 if __name__ == "__main__":
