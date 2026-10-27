@@ -29,6 +29,8 @@ jobs:
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
         with:
           enable-cache: true
+      - name: Lint
+        run: uv run ruff check tests scripts
       - name: Cache source-built permissive OR-Tools
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
@@ -38,10 +40,20 @@ jobs:
       - name: Verify the real extension
         run: |
           uv run --with "duckdb==$DUCKDB_VERSION" pytest -q --junitxml=test-results.xml
-          uv run ruff check tests scripts
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
           name: tests-duckdb-${{ matrix.duckdb }}-linux-amd64
           path: test-results.xml
           retention-days: 14
+
+  community:
+    name: Community build / Linux x86-64
+    uses: duckdb/extension-ci-tools/.github/workflows/_extension_distribution.yml@b8d325c37e82160886579880707493bd358c0e62
+    with:
+      extension_name: ortools
+      duckdb_version: v2.0.0
+      duckdb_commit: d54cbbe3df17e8e5ce68312f483b4155836112aa
+      ci_tools_version: b8d325c37e82160886579880707493bd358c0e62
+      reduced_ci_mode: enabled
+      exclude_archs: "linux_arm64;linux_amd64_musl;linux_arm64_musl;osx_amd64;osx_arm64;windows_amd64;windows_arm64;windows_amd64_mingw;windows_amd64_rtools;wasm_mvp;wasm_eh;wasm_threads"

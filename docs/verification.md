@@ -22,6 +22,8 @@ The community build uses the standard extension Makefile and version-specific AP
 
 ## Community publication
 
+Native CI also runs the pinned community distribution workflow on Linux x86-64 for DuckDB 2.0.0. This exercises the vcpkg manifest, standard Makefile, static dependency bootstrap, and community SQLLogicTest harness rather than only the standalone build script.
+
 For every release intended for community users, update the tested source commit and extension version in `extensions/ortools/description.yml` in `duckdb/community-extensions`. Keep explicit `ref` (2.0), `variegata` (1.5), and `andium` (1.4) pins. Ask maintainers for older-version deployments when their automatic jobs are disabled. After merge, verify fresh installations on each supported runtime/platform. GitHub release assets are not imported automatically.
 
 Recursive library audits permit only the declared dependency families and platform runtimes. They reject unknown libraries, unresolved dependencies, escaping symlinks, and absolute non-system loader paths. See the [dependency policy](dependencies.md).
